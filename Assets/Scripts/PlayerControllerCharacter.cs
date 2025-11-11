@@ -12,12 +12,14 @@ public class PlayerControllerCharacter : MonoBehaviour
     private Vector2 movement;
     public float speed = 5f;
     public float rotationSpeed = 10f;
+    public float jumpHeight = 2f;
     public TextMeshProUGUI countText;
     public GameObject winTextObject;
     public Transform modelTransform;
 
     private Vector3 playerVelocity;
     private float gravityValue = -9.81f;
+    private bool isJumping = false;
 
     void Start()
     {
@@ -43,11 +45,16 @@ public class PlayerControllerCharacter : MonoBehaviour
 
         controller.Move(move * speed * Time.deltaTime);
 
-        if (!controller.isGrounded)
-            playerVelocity.y += gravityValue * Time.deltaTime;
-        else
+        if (controller.isGrounded)
+        {
+            if (isJumping && playerVelocity.y < 0)
+            {
+                isJumping = false;
+            }
             playerVelocity.y = -1f;
+        }
 
+        playerVelocity.y += gravityValue * Time.deltaTime;
         controller.Move(playerVelocity * Time.deltaTime);
 
         bool isMoving = move.magnitude > 0.1f;
@@ -63,6 +70,15 @@ public class PlayerControllerCharacter : MonoBehaviour
     public void OnMove(InputAction.CallbackContext context)
     {
         movement = context.ReadValue<Vector2>();
+    }
+
+    public void OnJump(InputAction.CallbackContext context)
+    {
+        if (context.performed && controller.isGrounded)
+        {
+            isJumping = true;
+            playerVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravityValue);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
