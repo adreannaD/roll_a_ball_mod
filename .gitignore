@@ -7,6 +7,7 @@
 [Ll]ogs/
 [Mm]emoryCaptures/
 UserSettings/
+Packages/com.unity.collab-proxy/
 
 # OS-specific
 .DS_Store
@@ -30,3 +31,30 @@ Thumbs.db
 
 # Crash logs
 sysinfo.txt
+
+# Large binary/game asset types
+*.fbx
+*.obj
+*.dae
+*.blend
+*.hdr
+*.exr
+*.tga
+*.psd
+*.png
+*.jpg
+*.jpeg
+*.tif
+*.tiff
+*.wav
+*.mp3
+*.ogg
+*.avi
+*.mov
+*.mp4
+*.unitypackage
+
+# Optional: Ignore local project settings and cache
+ProjectSettings/EditorBuildSettings.asset
+ProjectSettings/GraphicsSettings.asset
+ProjectSettings/ProjectVersion.txt
