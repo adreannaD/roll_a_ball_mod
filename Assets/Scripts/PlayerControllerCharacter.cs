@@ -19,6 +19,7 @@ public class PlayerControllerCharacter : MonoBehaviour
     public TextMeshProUGUI countText;
     public GameObject winTextObject;
     public Transform modelTransform;
+    public TextMeshProUGUI livesText;
 
     private Vector3 playerVelocity;
     private float gravityValue = -9.81f;
@@ -27,6 +28,9 @@ public class PlayerControllerCharacter : MonoBehaviour
     private float dashTimer = 0f;
     private float lastDashTime = -1f;
     private Vector3 dashDirection;
+
+    [SerializeField] private int maxLives = 3;
+    private int currentLives;
 
     void Start()
     {
@@ -43,6 +47,10 @@ public class PlayerControllerCharacter : MonoBehaviour
 
         controller.slopeLimit = 60f;
         controller.stepOffset = 0.5f;
+
+        currentLives = maxLives;
+        UpdateLivesText();
+
     }
 
     void Update()
@@ -115,6 +123,46 @@ public class PlayerControllerCharacter : MonoBehaviour
         }
     }
 
+    private void RespawnAtNearestPoint()
+    {
+        currentLives--;
+        UpdateLivesText();
+
+        if (currentLives <= 0)
+        {
+            winTextObject.SetActive(true);
+            winTextObject.GetComponent<TextMeshProUGUI>().text = "Game Over!";
+            Time.timeScale = 0f;
+            return;
+        }
+
+        GameObject[] respawnPoints = GameObject.FindGameObjectsWithTag("Respawn");
+        Transform nearest = null;
+        float minDist = float.MaxValue;
+
+        foreach (GameObject point in respawnPoints)
+        {
+            float dist = Vector3.Distance(transform.position, point.transform.position);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                nearest = point.transform;
+            }
+        }
+
+        if (nearest != null)
+        {
+            controller.enabled = false;
+            transform.position = nearest.position;
+            controller.enabled = true;
+            playerVelocity = Vector3.zero;
+        }
+        else
+        {
+            Debug.LogWarning("No Respawn points found in scene!");
+        }
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("PickUp"))
@@ -122,6 +170,13 @@ public class PlayerControllerCharacter : MonoBehaviour
             other.gameObject.SetActive(false);
             count++;
             SetCountText();
+            return;
+        }
+
+        if (other.gameObject.CompareTag("KillFloor"))
+        {
+            RespawnAtNearestPoint();
+            return;
         }
     }
 
@@ -162,11 +217,10 @@ public class PlayerControllerCharacter : MonoBehaviour
     {
         if (hit.gameObject.CompareTag("Enemy"))
         {
-            Destroy(gameObject);
-            winTextObject.SetActive(true);
-            winTextObject.GetComponent<TextMeshProUGUI>().text = "You Lose!";
+            RespawnAtNearestPoint();
             return;
         }
+
 
         Rigidbody rb = hit.collider.attachedRigidbody;
         if (rb != null && !rb.isKinematic)
@@ -187,6 +241,12 @@ public class PlayerControllerCharacter : MonoBehaviour
     {
         float remaining = (lastDashTime + dashCooldown) - Time.time;
         return Mathf.Max(0, remaining);
+    }
+
+    private void UpdateLivesText()
+    {
+        if (livesText != null)
+            livesText.text = "Lives: " + currentLives;
     }
 
 }
