@@ -176,4 +176,17 @@ public class PlayerControllerCharacter : MonoBehaviour
             rb.linearVelocity = pushDir * pushPower;
         }
     }
+
+    public float LastDashCooldownRemaining()
+    {
+        float remaining = (lastDashTime + dashCooldown) - Time.time;
+        return remaining;
+    }
+
+    public float GetDashCooldownRemaining()
+    {
+        float remaining = (lastDashTime + dashCooldown) - Time.time;
+        return Mathf.Max(0, remaining);
+    }
+
 }
