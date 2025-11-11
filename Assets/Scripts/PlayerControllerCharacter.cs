@@ -11,6 +11,9 @@ public class PlayerControllerCharacter : MonoBehaviour
     private int count;
     private Vector2 movement;
     public float speed = 5f;
+    public float dashSpeed = 35f;
+    public float dashDuration = 0.6f;
+    public float dashCooldown = 0.8f;
     public float rotationSpeed = 10f;
     public float jumpHeight = 2f;
     public TextMeshProUGUI countText;
@@ -20,6 +23,10 @@ public class PlayerControllerCharacter : MonoBehaviour
     private Vector3 playerVelocity;
     private float gravityValue = -9.81f;
     private bool isJumping = false;
+    private bool isDashing = false;
+    private float dashTimer = 0f;
+    private float lastDashTime = -1f;
+    private Vector3 dashDirection;
 
     void Start()
     {
@@ -43,14 +50,25 @@ public class PlayerControllerCharacter : MonoBehaviour
         Vector3 move = cameraTransform.forward * movement.y + cameraTransform.right * movement.x;
         move.y = 0f;
 
-        controller.Move(move * speed * Time.deltaTime);
+        if (isDashing)
+        {
+            dashTimer -= Time.deltaTime;
+            controller.Move(dashDirection * dashSpeed * Time.deltaTime);
+
+            if (dashTimer <= 0f)
+            {
+                isDashing = false;
+            }
+        }
+        else
+        {
+            controller.Move(move * speed * Time.deltaTime);
+        }
 
         if (controller.isGrounded)
         {
             if (isJumping && playerVelocity.y < 0)
-            {
                 isJumping = false;
-            }
             playerVelocity.y = -1f;
         }
 
@@ -78,6 +96,22 @@ public class PlayerControllerCharacter : MonoBehaviour
         {
             isJumping = true;
             playerVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravityValue);
+        }
+    }
+
+    public void OnSprint(InputAction.CallbackContext context)
+    {
+        if (context.performed && !isDashing && Time.time > lastDashTime + dashCooldown)
+        {
+            Vector3 move = cameraTransform.forward * movement.y + cameraTransform.right * movement.x;
+            move.y = 0f;
+            if (move.magnitude > 0.1f)
+            {
+                dashDirection = move.normalized;
+                isDashing = true;
+                dashTimer = dashDuration;
+                lastDashTime = Time.time;
+            }
         }
     }
 
