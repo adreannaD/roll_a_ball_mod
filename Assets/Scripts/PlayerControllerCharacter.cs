@@ -32,6 +32,9 @@ public class PlayerControllerCharacter : MonoBehaviour
     [SerializeField] private int maxLives = 3;
     private int currentLives;
 
+    public AudioClip pickupSound;
+    private AudioSource audioSource;
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
@@ -51,6 +54,9 @@ public class PlayerControllerCharacter : MonoBehaviour
         currentLives = maxLives;
         UpdateLivesText();
 
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
     }
 
     void Update()
@@ -62,11 +68,8 @@ public class PlayerControllerCharacter : MonoBehaviour
         {
             dashTimer -= Time.deltaTime;
             controller.Move(dashDirection * dashSpeed * Time.deltaTime);
-
             if (dashTimer <= 0f)
-            {
                 isDashing = false;
-            }
         }
         else
         {
@@ -167,6 +170,9 @@ public class PlayerControllerCharacter : MonoBehaviour
     {
         if (other.gameObject.CompareTag("PickUp"))
         {
+            if (pickupSound != null && audioSource != null)
+                audioSource.PlayOneShot(pickupSound, 1f);
+
             other.gameObject.SetActive(false);
             count++;
             SetCountText();
@@ -221,7 +227,6 @@ public class PlayerControllerCharacter : MonoBehaviour
             return;
         }
 
-
         Rigidbody rb = hit.collider.attachedRigidbody;
         if (rb != null && !rb.isKinematic)
         {
@@ -248,5 +253,4 @@ public class PlayerControllerCharacter : MonoBehaviour
         if (livesText != null)
             livesText.text = "Lives: " + currentLives;
     }
-
 }

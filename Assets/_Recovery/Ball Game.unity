@@ -9287,6 +9287,7 @@ MonoBehaviour:
   modelTransform: {fileID: 0}
   livesText: {fileID: 2042157760}
   maxLives: 3
+  pickupSound: {fileID: 8300000, guid: 146d4b19f95fe6d40832414952b4ea39, type: 3}
 --- !u!114 &1081949814
 MonoBehaviour:
   m_ObjectHideFlags: 0
