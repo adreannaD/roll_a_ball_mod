@@ -20,6 +20,9 @@ public class PlayerControllerCharacter : MonoBehaviour
     public GameObject winTextObject;
     public Transform modelTransform;
     public TextMeshProUGUI livesText;
+    public float gameTime = 120f;
+    public TextMeshProUGUI timerText;
+    private bool isGameOver = false;
 
     private Vector3 playerVelocity;
     private float gravityValue = -9.81f;
@@ -39,6 +42,9 @@ public class PlayerControllerCharacter : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>();
+
         cameraTransform = Camera.main.transform;
 
         if (modelTransform == null && animator != null)
@@ -87,12 +93,34 @@ public class PlayerControllerCharacter : MonoBehaviour
         controller.Move(playerVelocity * Time.deltaTime);
 
         bool isMoving = move.magnitude > 0.1f;
-        animator.SetBool("isWalking", isMoving);
+        if (animator != null)
+            animator.SetBool("isWalking", isMoving);
 
         if (isMoving && modelTransform != null)
         {
             Quaternion targetRotation = Quaternion.LookRotation(move);
             modelTransform.rotation = Quaternion.Slerp(modelTransform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+        }
+
+        if (!isGameOver)
+        {
+            gameTime -= Time.deltaTime;
+
+            if (gameTime <= 0f)
+            {
+                gameTime = 0f;
+                isGameOver = true;
+                winTextObject.SetActive(true);
+                winTextObject.GetComponent<TextMeshProUGUI>().text = "Game Over! Time’s Up!";
+                Time.timeScale = 0f;
+            }
+
+            if (timerText != null)
+            {
+                int minutes = Mathf.FloorToInt(gameTime / 60);
+                int seconds = Mathf.FloorToInt(gameTime % 60);
+                timerText.text = $"Time: {minutes:00}:{seconds:00}";
+            }
         }
     }
 
