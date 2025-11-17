@@ -23,6 +23,8 @@ public class PlayerControllerCharacter : MonoBehaviour
     public float gameTime = 120f;
     public TextMeshProUGUI timerText;
     private bool isGameOver = false;
+    private bool hasWon = false;
+    public GameObject exitPad;
 
     private Vector3 playerVelocity;
     private float gravityValue = -9.81f;
@@ -102,9 +104,16 @@ public class PlayerControllerCharacter : MonoBehaviour
             modelTransform.rotation = Quaternion.Slerp(modelTransform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
 
-        if (!isGameOver)
+        if (!isGameOver && !hasWon)
         {
             gameTime -= Time.deltaTime;
+
+            if (timerText != null)
+            {
+                int minutes = Mathf.FloorToInt(gameTime / 60);
+                int seconds = Mathf.FloorToInt(gameTime % 60);
+                timerText.text = $"Time: {minutes:00}:{seconds:00}";
+            }
 
             if (gameTime <= 0f)
             {
@@ -113,13 +122,6 @@ public class PlayerControllerCharacter : MonoBehaviour
                 winTextObject.SetActive(true);
                 winTextObject.GetComponent<TextMeshProUGUI>().text = "Game Over! Time’s Up!";
                 Time.timeScale = 0f;
-            }
-
-            if (timerText != null)
-            {
-                int minutes = Mathf.FloorToInt(gameTime / 60);
-                int seconds = Mathf.FloorToInt(gameTime % 60);
-                timerText.text = $"Time: {minutes:00}:{seconds:00}";
             }
         }
     }
@@ -240,9 +242,16 @@ public class PlayerControllerCharacter : MonoBehaviour
             Transform door4 = doorsParent.Find("Door4");
             if (door4 != null) door4.gameObject.SetActive(false);
         }
+
         if (count >= 12)
         {
+            hasWon = true;
+
+            if (exitPad != null)
+                exitPad.SetActive(true);
+
             winTextObject.SetActive(true);
+
             Destroy(GameObject.FindGameObjectWithTag("Enemy"));
         }
     }

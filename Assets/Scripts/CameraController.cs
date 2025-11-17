@@ -3,17 +3,27 @@ using UnityEngine;
 public class CameraController : MonoBehaviour
 {
     public GameObject player;
+    public Transform modelTransform;
+    public float rotationSmoothSpeed = 5f;
+
     private Vector3 offset;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         offset = transform.position - player.transform.position;
     }
 
-    // Update is called once per frame
     void LateUpdate()
     {
         transform.position = player.transform.position + offset;
+
+        if (modelTransform != null)
+        {
+            Vector3 forward = modelTransform.forward;
+            forward.y = 0f;
+
+            Quaternion targetRotation = Quaternion.LookRotation(forward);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSmoothSpeed * Time.deltaTime);
+        }
     }
 }

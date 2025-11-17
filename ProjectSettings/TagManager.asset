@@ -7,6 +7,7 @@ TagManager:
   - PickUp
   - Enemy
   - KillFloor
+  - ExitPad
   layers:
   - Default
   - TransparentFX
